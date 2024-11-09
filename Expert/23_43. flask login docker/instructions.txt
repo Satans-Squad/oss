@@ -1,0 +1,145 @@
+To create a Docker image for a simple login form using Flask on port 7000, follow these steps:
+
+### Step 1: Create the Flask Application
+
+Let's create a simple Flask application that renders a login form and accepts user input.
+
+#### 1.1. **Create the Flask application (`app.py`)**
+
+```python
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+@app.route("/", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        # For demonstration, accept any non-empty username and password
+        if username and password:
+            return f"Login successful! Welcome, {username}."
+        else:
+            return "Login failed! Please provide both username and password."
+    
+    return render_template("login_form.html")
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=7000)
+```
+
+#### 1.2. **Create the HTML Login Form (`templates/login_form.html`)**
+
+Create a `templates` directory in the same folder as `app.py` and create a file `login_form.html` inside it.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form method="POST">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <input type="submit" value="Login">
+    </form>
+</body>
+</html>
+```
+
+This HTML file contains a simple form with `username` and `password` fields, and a submit button.
+
+### Step 2: Create the Dockerfile
+
+Now, create a `Dockerfile` to package this Flask application into a Docker container.
+
+#### 2.1. **Create the Dockerfile**
+
+Create a file named `Dockerfile` in the same directory as your `app.py` file:
+
+```dockerfile
+# Use the official Python image as a base
+FROM python:3.9-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the application files into the container
+COPY app.py .
+COPY templates /app/templates
+
+# Install Flask
+RUN pip install Flask
+
+# Expose port 7000
+EXPOSE 7000
+
+# Run the application
+CMD ["python", "app.py"]
+```
+
+### Step 3: Build and Run the Docker Container
+
+#### 3.1. **Build the Docker image**
+
+In the directory containing your `Dockerfile`, run the following command to build the Docker image:
+
+```bash
+docker build -t flask-login-app .
+```
+
+#### 3.2. **Run the Docker container**
+
+Once the image is built, run the container with the following command:
+
+```bash
+docker run -d -p 7000:7000 flask-login-app
+```
+
+This will run the Flask application inside the container and map port `7000` on the host to port `7000` inside the container.
+
+### Step 4: Access the Application
+
+Now, open your web browser and navigate to:
+
+```
+http://localhost:7000
+```
+
+You should see the login form. When you submit a username and password, it will return a message indicating whether the login was successful or failed.
+
+### Step 5: Clean Up (Optional)
+
+To stop the container:
+
+```bash
+docker stop <container_id>
+```
+
+To remove the container:
+
+```bash
+docker rm <container_id>
+```
+
+To remove the image:
+
+```bash
+docker rmi flask-login-app
+```
+
+### Summary of Files:
+
+- **app.py**: Flask application to handle login form and requests.
+- **templates/login_form.html**: HTML form for the login.
+- **Dockerfile**: Instructions to create the Docker image with Flask.
+
+This creates a Docker image for a simple Flask-based login form running on port `7000`.

@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  # MySQL Database container
+  mysql:
+    image: mysql:8
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: webform_db
+    ports:
+      - "3001:3001"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # PHP and Apache container with custom Dockerfile
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php_web
+    volumes:
+      - ./www:/var/www/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:

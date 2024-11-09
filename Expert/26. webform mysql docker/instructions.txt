@@ -1,0 +1,212 @@
+To create a simple web form to insert records into a MySQL database running in Docker, you can use Docker containers for both the MySQL database and the web application (PHP + Apache). Here's how you can set it up step by step:
+
+### Steps:
+
+1. **Set up Docker containers for MySQL and PHP web application.**
+2. **Create the HTML form.**
+3. **Create PHP code to handle form submissions and interact with MySQL.**
+4. **Configure the Docker environment to connect to the MySQL database.**
+
+---
+
+### 1. **Set up Docker Containers:**
+
+We'll create a `docker-compose.yml` file to define both the MySQL container and the web application container.
+
+#### 1.1 **Create a `docker-compose.yml` file:**
+
+```yaml
+version: '3.7'
+
+services:
+  # MySQL Database container
+  mysql:
+    image: mysql:8
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: webform_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # PHP and Apache container
+  web:
+    image: php:apache
+    container_name: php_web
+    volumes:
+      - ./www:/var/www/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+```
+
+Explanation:
+
+- **MySQL Service:**
+  - Using the `mysql:8` image, it will expose port `3306` and set up the root password (`rootpassword`) and the database name (`webform_db`).
+  
+- **Web Service (PHP + Apache):**
+  - Using the `php:apache` image, this container will serve your PHP application, and the code will be placed in the `./www` folder. It will expose port `8080` on your local machine.
+  - The `depends_on` field ensures the web container waits until MySQL is ready.
+
+#### 1.2 **Create the directory structure:**
+
+You will need a folder for the web code:
+
+```bash
+mkdir webform-docker
+cd webform-docker
+mkdir www
+```
+
+### 2. **Create the HTML Form (index.html):**
+
+Inside the `www` folder, create an `index.html` file with the form.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert Record</title>
+</head>
+<body>
+    <h1>Insert New Record</h1>
+    <form action="insert.php" method="POST">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
+```
+
+### 3. **Create the PHP Code (insert.php):**
+
+Also inside the `www` folder, create the `insert.php` file to handle the form submission and insert the data into MySQL.
+
+```php
+<?php
+$servername = "mysql";  // Use the MySQL service name defined in docker-compose.yml
+$username = "root";  // MySQL root username
+$password = "rootpassword";  // MySQL root password
+$dbname = "webform_db";  // Your database name
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Get data from the form
+$name = $_POST['name'];
+$email = $_POST['email'];
+
+// Prepare and bind SQL query to prevent SQL injection
+$stmt = $conn->prepare("INSERT INTO records (name, email) VALUES (?, ?)");
+$stmt->bind_param("ss", $name, $email);
+
+// Execute the statement
+if ($stmt->execute()) {
+    echo "New record inserted successfully!";
+} else {
+    echo "Error: " . $stmt->error;
+}
+
+// Close the connection
+$stmt->close();
+$conn->close();
+?>
+```
+
+### 4. **Run the Docker Containers:**
+
+#### 4.1 **Build and start the containers:**
+
+Now you can run the Docker containers using the `docker-compose` command.
+
+```bash
+docker-compose up -d
+```
+
+This will start both the MySQL and PHP containers in the background.
+
+#### 4.2 **Check the containers:**
+
+To ensure both containers are running, use:
+
+```bash
+docker ps
+```
+
+You should see both `mysql_db` and `php_web` containers running.
+
+### 5. **Set up MySQL Database:**
+
+You'll need to set up the database table in MySQL.
+
+#### 5.1 **Connect to the MySQL container:**
+
+```bash
+docker exec -it mysql_db bash
+```
+
+Once inside the MySQL container, log into MySQL:
+
+```bash
+mysql -u root -p
+```
+
+Enter the password (`rootpassword`).
+
+#### 5.2 **Create the database and table:**
+
+```sql
+USE webform_db;
+
+CREATE TABLE records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL
+);
+```
+
+### 6. **Access the Web Form:**
+
+Now, open your browser and go to `http://localhost:8080`. You should see the HTML form where you can enter a name and email to insert into the MySQL database.
+
+### 7. **Test the Form:**
+
+1. Enter a name and email in the form and submit.
+2. You should see a success message like "New record inserted successfully!".
+3. You can verify the data in MySQL by logging into the MySQL container and running:
+
+   ```sql
+   USE webform_db;
+   SELECT * FROM records;
+   ```
+
+### 8. **Stop the Containers:**
+
+To stop the containers, run:
+
+```bash
+docker-compose down
+```
+
+---
+
+This setup provides a simple web form inside a Dockerized environment, allowing you to insert records into a MySQL database.

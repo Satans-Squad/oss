@@ -1,0 +1,36 @@
+1.create you cpp/java code
+    calculator.cpp
+2.compile your code 
+    g++ calculator.cpp -o calculator
+3.create directory of you pkg name
+    mkdir calculator
+    cd calculator
+4.install essentials
+    sudo apt-get install build-essential
+5.create debian pkg
+    mkdir DEBIAN
+6.create debian control file
+    vi DEBIAN/control
+7.paste this code in control file
+    Package: calculator
+    Version: 1.0
+    Section: custom
+    Priority: optional
+    Architecture: all
+    Essential: no
+    Installed-Size: 1024
+    Maintainer: calculator.org
+    Description: This is calculator app
+8. In root of calculator file create /usr/bin/ and copy binary executable of calculator into /usr/bin/
+    mkdir -p /usr/bin/
+    cp ../calculator /usr/bin/
+    cd ..
+9.create debian pkg build
+    dpkg-deb --build calculator
+10.Use dpkg -i to install the .deb package you just created
+    sudo dpkg -i calculator.deb
+11.If you prefer using apt, run
+    sudo apt install ./calculator.deb
+12.Once installed, you should be able to run:
+    calculator
+

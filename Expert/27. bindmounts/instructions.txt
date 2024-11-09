@@ -1,0 +1,91 @@
+Here’s how to set up your project with a bind mount to make live updates to the HTML without needing to restart the container.
+
+### Step 1: Create an HTML File (`index.html`)
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Bind Mount Demo</title>
+    <style>
+        h1 {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+</body>
+</html>
+```
+
+### Step 2: Create a Node.js Server (`server.js`)
+```javascript
+const express = require('express');
+const path = require('path');
+
+const app = express();
+const PORT = 3000;
+
+// Serve the HTML file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
+```
+
+### Step 3: Create a `Dockerfile`
+```dockerfile
+# Use a base image with Node.js
+FROM node:18
+
+# Set the working directory
+WORKDIR /app
+
+# Copy package.json and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the application files
+COPY . .
+
+# Expose the port
+EXPOSE 3000
+
+# Start the server
+CMD ["node", "server.js"]
+```
+
+### Step 4: Create a `package.json` (if not already present)
+```json
+{
+  "name": "docker-live-update-demo",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+```
+
+Run `npm install` to generate `package-lock.json`.
+
+### Step 5: Build the Docker Image
+```bash
+docker build -t node-bind-mount-demo .
+```
+
+### Step 6: Run the Docker Container with Bind Mount
+Use the following command to run the container with a bind mount. This will allow any changes made to `index.html` in your host system to reflect inside the container without needing to restart it.
+
+```bash
+docker run -p 3000:3000 -v "$(pwd)/index.html:/app/index.html" node-bind-mount-demo
+```
+
+With this setup:
+- You can change the color in `index.html` on your local machine, and it will automatically reflect in the container.
+- Access the application by navigating to `http://localhost:3000` in your browser.
