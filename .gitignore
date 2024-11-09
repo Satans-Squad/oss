@@ -1,2 +1,67 @@
 53_LAMP
 LAMP
+
+# Linux
+*.swp
+*.bak
+*.tmp
+.DS_Store
+*.~lock.*
+
+# Apache
+*.log
+logs/
+error_log
+access_log
+*.conf
+*.crt
+*.key
+
+# MySQL
+*.sql
+*.sql.gz
+*.sql.bak
+*.sqlite
+*.db
+*.db-journal
+
+# PHP
+*.log
+vendor/
+composer.lock
+composer.phar
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+*.sqlite3
+
+# Virtual Environment
+venv/
+.env
+.env.*
+
+# Flask (if applicable)
+instance/
+migrations/
+
+# General
+*.log
+*.tmp
+*.swp
+.DS_Store
+.idea/
+.vscode/
+*.bak
+*.zip
+*.ini
+*.cache
+sessions/

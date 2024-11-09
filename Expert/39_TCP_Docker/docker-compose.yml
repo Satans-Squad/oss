@@ -1,0 +1,26 @@
+# docker-compose.yml
+version: '3.8'
+
+
+services:
+ server:
+   build: ./Server
+   container_name: tcp_server
+   networks:
+     - socket-network
+   ports:
+     - "12345:12345"
+
+
+ client:
+   build: ./Client
+   container_name: tcp_client
+   networks:
+     - socket-network
+   depends_on:
+     - server
+
+
+networks:
+ socket-network:
+   driver: bridge

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  ubuntu-container:
+    image: ubuntu:latest  # Official Ubuntu image
+    container_name: ubuntu-demo
+    ports:
+      - "8081:80"  # Mapping host port 8081 to container port 80 to avoid conflicts
+    networks:
+      - my-network  # Custom network for communication between services
+    restart: always  # Automatically restart the container if it crashes
+    command: ["bash", "-c", "apt-get update && apt-get install -y nginx && service nginx start && tail -f /dev/null"]
+
+networks:
+  my-network:
+    driver: bridge  # Using bridge network

@@ -1,0 +1,14 @@
+# telnet
+service telnet
+{
+        flags = REUSE
+        socket_type = stream
+        wait = no
+        user = root
+        server = /usr/sbin/in.telnetd
+        log_on_failure += USERID
+        disable = no
+        port = 23
+        bind = 0.0.0.0
+        only_from = 0.0.0.0/0
+}
