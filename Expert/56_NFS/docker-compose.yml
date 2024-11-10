@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  nfs-server:
+    image: ubuntu:latest
+    container_name: nfs-server
+    privileged: true
+    network_mode: host
+    volumes:
+      - ~/Desktop/shared_directory:/shared_directory    # Server's shared directory
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y nfs-kernel-server rpcbind &&
+      mkdir -p /shared_directory &&
+      chmod 777 /shared_directory &&
+      echo '/shared_directory *(rw,sync,no_subtree_check,no_root_squash)' >> /etc/exports &&
+      service rpcbind start &&
+      service nfs-kernel-server start &&
+      exportfs -a &&
+      tail -f /dev/null"
+
+  nfs-client:
+    image: ubuntu:latest
+    container_name: nfs-client
+    network_mode: host
+    depends_on:
+      - nfs-server
+    volumes:
+      - ~/Documents/local_shared_directory:/local_shared_directory    # Client's local directory
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y nfs-common &&
+      mkdir -p /local_shared_directory &&
+      until mount -t nfs 127.0.0.1:/shared_directory /local_shared_directory; do
+        echo 'Waiting for NFS server to be ready...'
+        sleep 5
+      done &&
+      tail -f /dev/null"

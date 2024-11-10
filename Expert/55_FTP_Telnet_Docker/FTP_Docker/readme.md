@@ -1,10 +1,12 @@
 
-1. docker build -t ubuntu-ftp-telnet .
+1. docker build -t ftp-server .
 
 2. docker run -d \
-  --network host \
-  --name ftp-telnet-server \
-  ubuntu-ftp-telnet
+  --name ftp-container \
+  -p 21:21 \
+  -p 40000-40100:40000-40100 \
+  --net=host \
+  ftp-server
 
 
 ####### FTP
