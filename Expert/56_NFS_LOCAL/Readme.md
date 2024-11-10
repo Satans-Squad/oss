@@ -8,7 +8,7 @@ sudo apt install nfs-common
 
 cd Desktop
 mkdir shared_directory
-
+chmod 777 shared_directory
 # setting path of shared_directory in exports file
 
 pwd
@@ -25,7 +25,7 @@ sudo nano /etc/exports
 
 # Restart the server
 
-sudo systemctl nfs-kernel-server
+sudo systemctl restart nfs-kernel-server
 
 # Ensure the directory is shared using the following command
 
@@ -37,10 +37,10 @@ This command should show the directory you have created
 
 cd Documents
 mkdir local_shared_directory
-
+chmod 777 local_shared_directory
 # Mounting the shared_directory to our local_shared_directory
 
-sudo mount -t nfs 127.0.0.1:/home/<username>/Desktop/shared_directory ~/Documents/local_shared_directory
+    sudo mount -t nfs 127.0.0.1:/home/<username>/Desktop/shared_directory ~/Documents/local_shared_directory
 
 # Once done, create files in either folder which will reflect in other folder
 
