@@ -13,7 +13,6 @@ LAMP
 logs/
 error_log
 access_log
-*.conf
 *.crt
 *.key
 
