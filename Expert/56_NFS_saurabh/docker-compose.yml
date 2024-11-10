@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  nfs-server:
+    image: ubuntu:latest
+    container_name: nfs-server
+    privileged: true
+    networks:
+      - nfs_network
+    volumes:
+      - ./shared_directory:/shared_directory
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y nfs-kernel-server rpcbind &&
+      mkdir -p /shared_directory &&
+      chmod 777 /shared_directory &&
+      echo '/shared_directory *(rw,sync,no_subtree_check,no_root_squash,insecure)' > /etc/exports &&
+      exportfs -a &&
+      service rpcbind start &&
+      service nfs-kernel-server start &&
+      echo 'NFS Server is ready!' &&
+      tail -f /dev/null"
+    healthcheck:
+      test: ["CMD", "exportfs", "-s"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  nfs-client:
+    image: ubuntu:latest
+    container_name: nfs-client
+    depends_on:
+      nfs-server:
+        condition: service_healthy
+    networks:
+      - nfs_network
+    volumes:
+      - /mnt/nfs_share  # Define as a volume to persist between restarts
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y nfs-common &&
+      mkdir -p /mnt/nfs_share &&
+      echo 'Waiting for NFS server...' &&
+      until showmount -e nfs-server; do
+        sleep 5
+      done &&
+      mount -t nfs -o vers=3,rw,sync nfs-server:/shared_directory /mnt/nfs_share &&
+      echo 'NFS mount successful!' &&
+      tail -f /dev/null"
+
+networks:
+  nfs_network:
+    driver: bridge
