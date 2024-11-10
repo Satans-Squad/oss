@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  ftp_server:
+    image: fauria/vsftpd
+    container_name: ftp_server
+    environment:
+      - FTP_USER=anonymous
+      - FTP_PASS=anonymous
+      - ANONYMOUS_ACCESS=yes
+      - PASV_ADDRESS=127.0.0.1
+      - PASV_MIN_PORT=30000
+      - PASV_MAX_PORT=30009
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    volumes:
+      - ./ftp_data:/home/vsftpd
+    restart: always
