@@ -1,0 +1,7 @@
+docker login
+
+
+docker tag local_image_name your_dockerhub_username/your_image_name:tag
+
+
+docker push your_dockerhub_username/your_image_name:tag
