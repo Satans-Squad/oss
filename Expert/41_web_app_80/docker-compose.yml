@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  web-instance1:
+    build: .
+    container_name: web-instance1
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql-db
+    networks:
+      - login-network
+    environment:
+      - DB_HOST=mysql-db
+      - DB_NAME=logindb
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+
+  web-instance2:
+    build: .
+    container_name: web-instance2
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql-db
+    networks:
+      - login-network
+    environment:
+      - DB_HOST=mysql-db
+      - DB_NAME=logindb
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: logindb
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - login-network
+
+networks:
+  login-network:
+    driver: bridge
+
+volumes:
+  db-data:
